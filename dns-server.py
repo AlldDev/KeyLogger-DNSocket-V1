@@ -28,7 +28,7 @@ def start_dns_server():
             # Lê a requisição DNS
             request = DNSRecord.parse(data)
             data = str(request.q.qname)
-            data = request.replace(_FAKE_DOMAIN, '')
+            data = data.replace(_FAKE_DOMAIN, '')
             
             # Decodifica os dados do domínio
             data = ''.join([chr(int(data[i:i+2], 16)) for i in range(0, len(data), 2)])
