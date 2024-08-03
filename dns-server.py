@@ -15,10 +15,6 @@ _FAKE_DOMAIN = '.example.com.'
 ###############################################################
 # Classes e Funções
 ###############################################################
-def decode_request(request):
-    data = request.replace(_FAKE_DOMAIN, '')
-    return data
-
 def start_dns_server():
     # Cria um socket para ouvir requisições DNS
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -31,21 +27,17 @@ def start_dns_server():
             
             # Lê a requisição DNS
             request = DNSRecord.parse(data)
-            print(f'DNS PARSE: {request}')
-            domain = str(request.q.qname)
-            print(f'REQUEST.Q>NAME: {domain}')
+            data = str(request.q.qname)
+            data = request.replace(_FAKE_DOMAIN, '')
             
             # Decodifica os dados do domínio
-            decoded_data = decode_request(domain)
-            decoded_data = decoded_data.replace('\\032', ' ')
-            print(f"Dados exfiltrados: {decoded_data}")
-            
-            
+            data = ''.join([chr(int(data[i:i+2], 16)) for i in range(0, len(data), 2)])
+            print(f"Dados exfiltrados: {data}")            
             
             # Criando um objeto DNSRecord para a resposta
             dns_response = DNSRecord()
             # Adicionando uma resposta DNS
-            #dns_response.add_answer(RR('www.example.com', QTYPE.A, rdata=A('192.0.2.1')))
+            dns_response.add_answer(RR(_FAKE_DOMAIN[1:], QTYPE.A, rdata=A('127.0.0.1')))
             # Convertendo a resposta para uma representação de bytes
             response_bytes = dns_response.pack()
             print(response_bytes.hex())  # Exibindo a resposta em hexadecimal

