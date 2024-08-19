@@ -109,27 +109,24 @@ def on_release(key):
         elif key == key.backspace:
             _KEYS = _KEYS[:-1]
 
-        if key == key.caps_lock:
-            _KEYS.append('¥')
-
-        if key == key.num_lock:
+        elif key == key.num_lock:
             _KEYS.append('ß')
 
-        if key == key.cmd:
+        elif key == key.cmd:
             _KEYS.append('┤')                                                                       
 
-        if key == key.tab:
+        elif key == key.tab:
             _KEYS.append('¤')
 
-        if key == key.ctrl_l or key.ctrl_r:
+        elif key == key.ctrl_l or key.ctrl_r:
             _KEYS.append('©')
 
-        if key == key.shift or key.shift_l:
+        elif key == key.shift or key.shift_l:
             _KEYS.append('Þ')
     
     # O TECLADO NUMERO ESTÁ RETORNANDO NONE, TENHO QUE CONFERIR OQUE ESTÁ ACONTECENDO
-        if key == None:
-            _KEYS.append('¿')
+        # if key == None:
+        #     _KEYS.append('¿')
             
         else:
             print(key)
