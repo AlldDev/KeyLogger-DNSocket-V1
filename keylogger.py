@@ -110,25 +110,7 @@ def on_release(key):
             _KEYS = _KEYS[:-1]
 
         else:
-            print(key)
-
-        '''
-        elif key == key.num_lock:
-            _KEYS.append('ß')
-
-        elif key == key.cmd:
-            _KEYS.append('┤')                                                                       
-
-        elif key == key.tab:
-            _KEYS.append('¤')
-
-        elif key == key.ctrl_l or key.ctrl_r:
-            _KEYS.append('©')
-
-        elif key == key.shift or key.shift_l:
-            _KEYS.append('Þ')
-        '''            
-        
+            print(key)     
 
 ###############################################################
 # Main
