@@ -1,0 +1,4 @@
+sc.exe delete "Teste"
+Remove-Service -Name "Teste"
+Get-Service -Name "Teste"
+New-Service -Name "Teste" -BinaryPathName "PATH NAME" -DisplayName "teste_service" -Description "Descrição do serviço" -StartupType Automatic
