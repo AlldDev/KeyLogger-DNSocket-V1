@@ -1,4 +1,16 @@
-sc.exe delete "Teste"
+CRIAÇÃO DE SERVIÇOS PARA WINDOWS
+--------------------------------------------------------------------------------------
 Remove-Service -Name "Teste"
 Get-Service -Name "Teste"
 New-Service -Name "Teste" -BinaryPathName "PATH NAME" -DisplayName "teste_service" -Description "Descrição do serviço" -StartupType Automatic
+--------------------------------------------------------------------------------------
+Outras maneiras:
+--------------------------------------------------------------------------------------
+sc create MeuServico binpath=c:\Sistema\Arquivo.exe
+sc.exe delete "Teste"
+   -IP DA MAQUINA-                               -Nome de exibição do serviço- 
+sc \\192.168.1.49 config MeuServico displayname="Serviço Teste - Ambiente Homolog"
+sc delete nome_do_serviço
+sc query  --Consultar serviços ativos--
+sc query type= service -- Enumera os serviços ativos --
+sc start servico -- Da start em algum serviço --
