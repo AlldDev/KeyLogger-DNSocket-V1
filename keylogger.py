@@ -118,12 +118,43 @@ def on_release(key):
     
     key = str(key).replace("'", "").replace('[', '').replace(']', '')
 
+    # Tratando o 5 no Linux
     if key == '<65437>':
         _KEYS.append('5')
 
+    # Tratar os especiais
+    elif 'Key.enter' == key or 'Key.space' == key:
+        _KEYS.append(' ')
+    # Tratando os numeros
+    elif '<96>' == key:
+        _KEYS.append('0')
+    elif '<97>' == key:
+        _KEYS.append('1')
+    elif '<98>' == key:
+        _KEYS.append('2')
+    elif '<99>' == key:
+        _KEYS.append('3')
+    elif '<100>' == key:
+        _KEYS.append('4')
+    elif '<101>' == key:
+        _KEYS.append('5')
+    elif '<102>' == key:
+        _KEYS.append('6')
+    elif '<103>' == key:
+        _KEYS.append('7')
+    elif '<104>' == key:
+        _KEYS.append('8')
+    elif '<105>' == key:
+        _KEYS.append('9')
+
+    # Jogando fora todo os Shift
     elif 'Key' in key:
         pass
-    
+
+    elif '<110>' == key:
+        _KEYS.append(',')
+
+    # Capturando as teclas
     else:
         _KEYS.append(key)
   
