@@ -116,10 +116,16 @@ def on_release(key):
     if key == keyboard.Key.esc:
         return False
     
-    try:
-        _KEYS.append(key.char)
 
+    try:
+        _KEYS.append(str(key.char))
     except AttributeError:
+        # Tratando os numeros
+        if key == 96:
+            _KEYS.append('0')
+
+
+        # Tratando espaços, enters e etc...
         if key == key.space or key == key.enter:
             try:
                 if _KEYS[-1] == ' ':
@@ -132,8 +138,9 @@ def on_release(key):
         elif key == key.backspace:
             _KEYS = _KEYS[:-1]
 
-        else:
-            print(key)     
+        
+        print('special key {0} pressed'.format(key))
+  
 
 ###############################################################
 # Main
