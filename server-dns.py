@@ -104,14 +104,14 @@ def menu(addr=None, data=None):
     global _LAST_REQUEST, _PORT
 
     if len(_LAST_REQUEST) <= 10 and data != None:
-        _LAST_REQUEST.append(f'  {addr} | {data}')
+        _LAST_REQUEST.append(f'  {_COR['yellow']}{addr}{_COR['limpa']} | {data}')
     elif len(_LAST_REQUEST) >= 10:
         _LAST_REQUEST.pop(0)
-        _LAST_REQUEST.append(f'  {addr} | {data}')
+        _LAST_REQUEST.append(f'  {_COR['yellow']}{addr}{_COR['limpa']} | {data}')
 
     request_string = ''.join(i for i in _LAST_REQUEST)
 
-    os.system('cls')
+    os.system('clear')
 
     # Sei que a visualização por aqui fica ruim, porém no terminal fica lindo!
     print(f"""
@@ -126,7 +126,6 @@ def menu(addr=None, data=None):
 |------,-',--'--,'---'---'---'---'---'---'-,-'---',--,------|   [Aceitando requisições na porta {_COR['green']}{_PORT}{_COR['limpa']}]
 | ctrl |  | alt |                          | alt  |  | ctrl |   [Requisições em tempo real]
 '------'--'-----'--------------------------'------'--'------'
-
 {request_string}""")
 
 

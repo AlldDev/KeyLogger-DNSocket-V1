@@ -131,7 +131,12 @@ def on_release(key):
 
     # Trato se for algum caractere especial
     except AttributeError:
-        print(f'Não tenho tratamento para isso: {key}')
+
+        if str(key)          == 'Key.space':
+            _KEYS.append(' ')
+
+        else:
+            print(f'Não tenho tratamento para isso: {key}')
 
 ###############################################################
 # Main
