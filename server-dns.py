@@ -17,7 +17,7 @@ else:
     _PORT = 9953
 
 _DNS_ADDR = ('0.0.0.0', _PORT)
-_FAKE_DOMAIN = '.example.com.'
+_FAKE_DOMAIN = '.fake-domain.com.'
 _LAST_REQUEST = []
 _COR = {
         'limpa':'\033[m',
@@ -90,6 +90,12 @@ def write_on_file(path, arq_name, data):
             file.write(data)
             file.close()
 
+def limpar_tela():
+    if 'linux' in sys.platform:
+        os.system('clear')
+    elif 'win' in sys.platform:
+        os.system('cls')
+
 def menu(addr=None, data=None):
     '''
     Printa o Menu na tela.
@@ -104,14 +110,16 @@ def menu(addr=None, data=None):
     global _LAST_REQUEST, _PORT
 
     if len(_LAST_REQUEST) <= 10 and data != None:
-        _LAST_REQUEST.append(f'  {_COR['yellow']}{addr}{_COR['limpa']} | {data}')
+        _LAST_REQUEST.append(f"  {_COR['yellow']}{addr}{_COR['limpa']} | {data}")
     elif len(_LAST_REQUEST) >= 10:
         _LAST_REQUEST.pop(0)
-        _LAST_REQUEST.append(f'  {_COR['yellow']}{addr}{_COR['limpa']} | {data}')
+        _LAST_REQUEST.append(f"  {_COR['yellow']}{addr}{_COR['limpa']} | {data}")
 
+    #print(_LAST_REQUEST)
     request_string = ''.join(i for i in _LAST_REQUEST)
+    #print(request_string)
 
-    os.system('clear')
+    limpar_tela()
 
     # Sei que a visualização por aqui fica ruim, porém no terminal fica lindo!
     print(f"""
@@ -128,8 +136,6 @@ def menu(addr=None, data=None):
 '------'--'-----'--------------------------'------'--'------'
 {request_string}""")
 
-
-
 def start_dns_server():
     global _CONT
     # Cria um socket para ouvir requisições DNS
@@ -140,7 +146,7 @@ def start_dns_server():
         pass
     else:
         os.mkdir('logs')
-    
+
     menu()
     
     while True:
@@ -185,7 +191,6 @@ def start_dns_server():
 
         except Exception as e:
             print(e)
-
 
 ###############################################################
 # Main
