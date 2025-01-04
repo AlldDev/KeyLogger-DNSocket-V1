@@ -3,7 +3,7 @@ https://alld.dev/assets/others/package_digistump_index.json
 ou
 https://raw.githubusercontent.com/digistump/arduino-boards-index/master/package_digistump_index.json
 
-### Ubunto ###
+### Ubuntu ###
 sudo apt install libusb-dev
 
 sudo usermod -a -G dialout nome_do_usuario
