@@ -131,9 +131,10 @@ def menu(addr=None, data=None):
 | Caps | {_COR['red']}A{_COR['limpa']} | {_COR['red']}S{_COR['limpa']} | {_COR['red']}D{_COR['limpa']} | F | G | H | J | K | L | Ç | ~ |  Enter |   ││││ │ ├─┤   {_COR['red']}║║║║║╚═╗{_COR['limpa']}├┤ ├┬┘└┐┌┘├┤ ├┬┘
 |------'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'--------|   └┴┘┴ ┴ ┴ ┴  {_COR['red']}═╩╝╝╚╝╚═╝{_COR['limpa']}└─┘┴└─ └┘ └─┘┴└─
 | Shift  | Z | X | C | V | B | N | M | < | > | ; |   Shift  |
-|------,-',--'--,'---'---'---'---'---'---'-,-'---',--,------|   [Aceitando requisições na porta {_COR['green']}{_PORT}{_COR['limpa']}]
-| ctrl |  | alt |                          | alt  |  | ctrl |   [Requisições em tempo real]
-'------'--'-----'--------------------------'------'--'------'
+|------,-',--'--,'---'---'---'---'---'---'-,-'---',--,------|   * Aceitando requisições na porta {_COR['green']}{_PORT}{_COR['limpa']}
+| ctrl |  | alt |                          | alt  |  | ctrl |   * Requisições em tempo real
+'------'--'-----'--------------------------'------'--'------'   * Para requisições mais detalhadas olhe na pasta 'logs'
+------------------------------------------------------------------------------------------------------------------------
 {request_string}""")
 
 def start_dns_server():
